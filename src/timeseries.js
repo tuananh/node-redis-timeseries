@@ -43,7 +43,7 @@ TimeSeries.prototype.recordHit = function(key, timestamp, increment) {
         tmpKey = [self.keyBase, key, gran, keyTimestamp].join(':'),
         hitTimestamp = getRoundedTime(properties.duration, timestamp);
 
-   self.pendingMulti.hincrby(tmpKey, hitTimestamp, Math.floor(increment || 1));
+   self.pendingMulti.hincrbyfloat(tmpKey, hitTimestamp, increment || 1);
    self.pendingMulti.expireat(tmpKey, keyTimestamp + 2 * properties.ttl);
   });
 
@@ -81,7 +81,7 @@ TimeSeries.prototype.exec = function(callback) {
   current.exec(callback);
 };
 
-/** 
+/**
  * getHits("messages", "10minutes", 3, cb)
  *   --> "messages" hits during the last 3 '10minutes' chunks
  */
@@ -113,7 +113,7 @@ TimeSeries.prototype.getHits = function(key, gran, count, callback) {
     }
 
     for(var ts=from, i=0, data=[]; ts<=to; ts+=properties.duration, i+=1) {
-      data.push([ts, results[i] ? parseInt(results[i], 10) : 0]);
+      data.push([ts, results[i] ? parseFloat(results[i]) : 0]);
     }
 
     return callback(null, data.slice(Math.max(data.length - count, 0)));
@@ -130,4 +130,3 @@ var getRoundedTime = function(precision, time) {
   time = time || getCurrentTime();
   return Math.floor(time / precision) * precision;
 };
-
