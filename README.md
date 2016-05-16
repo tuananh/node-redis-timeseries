@@ -1,16 +1,12 @@
-# Node.js API for storing and querying time series in Redis
-
-[![Build Status][travis-image]][travis]
+# Node.js implementation of storing timeseries data
 
 Convenient module for storing and querying time series statistics in Redis using Node.js.
 
-The design (and even parts of the implementation) were picked from the [ApiAxle](http://blog.apiaxle.com/post/storing-near-realtime-stats-in-redis/) project.
-
-You can find basic usage examples in `examples`. This module also powers a [real-time dashboard](https://github.com/tonyskn/node-dashboard) written in Node.js. Check the sources out for more insight.
+You can find basic usage examples in `examples`.
 
 ## Dependencies
 
-`redis-timeseries` has no dependencies, and will work along the `redis` module you'll install in your own project. `redis@~0.9.0` versions are compatible.
+`redis-timeseries` has no dependencies, and will work along the `redis` module you'll install in your own project. `redis@2.6.0-2` (latest as of currently) versions are compatible.
 
 ## Usage
 
