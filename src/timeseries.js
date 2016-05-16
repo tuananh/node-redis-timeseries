@@ -1,7 +1,7 @@
 var TimeSeries = module.exports = function(redis, keyBase, granularities) {
-    this.redis = redis;
-    this.keyBase = keyBase || 'stats';
-    this.pendingMulti = redis.multi();
+    this.redis = redis
+    this.keyBase = keyBase || 'stats'
+    this.pendingMulti = redis.multi()
     this.granularities = granularities || {
         '1second': { ttl: this.minutes(5), duration: 1 },
         '1minute': { ttl: this.hours(1), duration: this.minutes(1) },
@@ -29,7 +29,7 @@ TimeSeries.prototype.months  = function(i) { return i*(this.weeks(4)+this.days(2
  *              .recordHit("purchases", ts)
  *              .recordHit("purchases", ts, 3)
  *              ...
- *              .exec([callback]);
+ *              .exec([callback])
  *
  * `timestamp` should be in seconds, and defaults to current time.
  * `increment` should be an integer, and defaults to 1
@@ -40,7 +40,7 @@ TimeSeries.prototype.recordHit = function(key, timestamp, increment) {
     Object.keys(this.granularities).forEach(function(gran) {
         var properties = self.granularities[gran]
         var keyTimestamp = getRoundedTime(properties.ttl, timestamp)
-        var tmpKey = [self.keyBase, key, gran, keyTimestamp].join(':')
+        var tmpKey = makeRedisKey([key,gran,keyTimestamp])
         var hitTimestamp = getRoundedTime(properties.duration, timestamp)
 
         self.pendingMulti.hincrbyfloat(tmpKey, hitTimestamp, increment ||  1)
@@ -48,7 +48,7 @@ TimeSeries.prototype.recordHit = function(key, timestamp, increment) {
     })
 
     return this
-};
+}
 
 
 /*
@@ -104,7 +104,7 @@ TimeSeries.prototype.getHits = function(key, gran, count, callback) {
 
     for (var ts = from, multi = this.redis.multi(); ts <= to; ts += properties.duration) {
         var keyTimestamp = getRoundedTime(properties.ttl, ts)
-        var tmpKey = [this.keyBase, key, gran, keyTimestamp].join(':')
+        var tmpKey = makeRedisKey([key,gran,keyTimestamp])
 
         multi.hget(tmpKey, ts)
     }
@@ -126,10 +126,16 @@ TimeSeries.prototype.getHits = function(key, gran, count, callback) {
 // Get current timestamp in seconds
 var getCurrentTime = function() {
     return Math.floor(Date.now() / 1000)
-};
+}
 
 // Round timestamp to the 'precision' interval (in seconds)
 var getRoundedTime = function(precision, time) {
     time = time || getCurrentTime()
     return Math.floor(time / precision) * precision
-};
+}
+
+// Make redis key
+var makeRedisKey = function (arr) {
+    arr.unshift(this.keyBase)
+    return arr.join(':')
+}
