@@ -16,7 +16,7 @@ You can find basic usage examples in `examples`. This module also powers a [real
 
 ```javascript
 var TimeSeries = require('redis-timeseries'),
-	redis = require('redis').createClient();
+    redis = require('redis').createClient();
 	
 // Create the TimeSeries client
 //
@@ -40,10 +40,10 @@ var ts = new TimeSeries(redis, "stats", granularities);
 //
 // .exec takes an optional callback with no arguments.
 ts.recordHit('your_stats_key')
-  .recordHit('another_stats_key', timestamp)
-  .recordHit('another_stats_key', timestamp2, increment)
-  …
-  .exec(callback);
+    .recordHit('another_stats_key', timestamp)
+    .recordHit('another_stats_key', timestamp2, increment)
+    …
+    .exec(callback);
 
 // Removing hits
 //
