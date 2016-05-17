@@ -40,7 +40,7 @@ TimeSeries.prototype.recordHit = function(key, timestamp, increment) {
     Object.keys(this.granularities).forEach(function(gran) {
         var properties = self.granularities[gran]
         var keyTimestamp = getRoundedTime(properties.ttl, timestamp)
-        var tmpKey = makeRedisKey([key,gran,keyTimestamp])
+        var tmpKey = makeRedisKey([self.baseKey,key,gran,keyTimestamp])
         var hitTimestamp = getRoundedTime(properties.duration, timestamp)
 
         self.pendingMulti.hincrbyfloat(tmpKey, hitTimestamp, increment ||  1)
@@ -88,7 +88,8 @@ TimeSeries.prototype.exec = function(callback) {
  *   --> "messages" hits during the last 3 '10minutes' chunks
  */
 TimeSeries.prototype.getHits = function(key, gran, count, callback) {
-    var properties = this.granularities[gran]
+    var self = this
+    var properties = self.granularities[gran]
     var currentTime = getCurrentTime()
 
     if (typeof properties === "undefined")  {
@@ -102,9 +103,9 @@ TimeSeries.prototype.getHits = function(key, gran, count, callback) {
     var from = getRoundedTime(properties.duration, currentTime - count * properties.duration),
         to = getRoundedTime(properties.duration, currentTime)
 
-    for (var ts = from, multi = this.redis.multi(); ts <= to; ts += properties.duration) {
+    for (var ts = from, multi = self.redis.multi(); ts <= to; ts += properties.duration) {
         var keyTimestamp = getRoundedTime(properties.ttl, ts)
-        var tmpKey = makeRedisKey([key,gran,keyTimestamp])
+        var tmpKey = makeRedisKey([self.baseKey,key,gran,keyTimestamp])
 
         multi.hget(tmpKey, ts)
     }
@@ -136,6 +137,5 @@ var getRoundedTime = function(precision, time) {
 
 // Make redis key
 var makeRedisKey = function (arr) {
-    arr.unshift(this.keyBase)
     return arr.join(':')
 }
